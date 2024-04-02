@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:4.0.2-xenial
+    volumes:
+      - vedbjorn-rest:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - bridged
+
+  neo4j:
+    image : neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - bridged
+    environment:
+      - NEO4J_AUTH=neo4j/letmein
+    volumes:
+      - neo4j-persist:/data
+ 
+  matching:
+    build:
+      context: ./matching/
+    networks:
+      - bridged
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/vedbjorn?ssl=false
+      - DEBUGGING=true
+    depends_on:
+      - mongodb
+      - neo4j
+
+networks:
+  bridged:
+    driver: bridge
+
+volumes:
+  vedbjorn-rest:
+  neo4j-persist:
